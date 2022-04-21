@@ -1,3 +1,10 @@
+from math import ceil, log2
+
+def mask(i):
+    return i & 255
+
+def bit_size(n):
+    return ceil(log2(n + 1)) 
 
 
 def get_rows_form(vector, row_size):
@@ -55,3 +62,37 @@ def get_xor(w1: bytes, w2: bytes):
         result.append(b ^ w2[idx])
 
     return bytes(result)
+
+def xtime(b: int):
+    """ b: integer in the range 0-255"""
+
+    ans = (b << 1)
+
+    # Checking if the MSB is 1
+    bit_7 = (b >> 7) & 1
+
+    ans ^= bit_7 * 0x1b
+
+    return mask(ans)
+
+def gmul_2(b, pow_2: int):
+
+    if pow_2 == 2:
+        return xtime(b)
+
+    if pow_2 == 1:
+        return b
+
+    return xtime(gmul_2(b, pow_2 >> 1))
+
+def gmul(b: int, c: int):
+
+    ans = 0
+    for p in range(0, bit_size(c)):
+
+        # print(p)
+        if (1 << p) & c != 0:
+            # print("entrei", 1 << p)
+            ans ^= gmul_2(b, (1 << p))
+
+    return ans

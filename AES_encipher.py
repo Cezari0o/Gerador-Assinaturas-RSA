@@ -19,7 +19,6 @@ class AES_cipher:
 
         ROTL8 = lambda x, shift: (x << shift) | (x >> (8 - shift))
     
-    
         p = q = 1
 
         while True:
@@ -258,4 +257,4 @@ class CTR_Mode:
         ctr = ctr_value.to_bytes(length = 16, byteorder = "big")
         state = self.cipher.encrypt(ctr)
 
-        return get_xor(data, state)        
+        return get_xor(data, state)
