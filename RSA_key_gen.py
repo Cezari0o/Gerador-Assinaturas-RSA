@@ -47,9 +47,9 @@ class key_pair:
         self.n = self.p = self.q = self.d = self.e = 0
         self.private = self.public = ()
     
-    def set_private(self, n, p, q, d):
+    def set_private(self, n, d, p = None, q = None):
         self.n, self.p, self.q, self.d = n, p, q, d
-        self.private = (n, p, q, d)
+        self.private = (n, d)
 
     def set_public(self, n, e):
         self.public = (n, e)
@@ -173,6 +173,12 @@ class key_gen:
         if e == None or e >= lower_bound:
             e = 65537 # 2**16 +1, a prime number
 
+        if not (e >= 3):
+            raise Exception("Public exponent e must be greater than 3!")
+
+        if e >= upper_bound:
+            raise Exception(f"Public exponent e must be less than 2^{ceil(bit_size / 2)}!")
+        
         prime_p = self.generate_prime_number(lower_bound, upper_bound, e)
 
         prime_q = self.generate_prime_number(lower_bound, upper_bound, e)
@@ -187,7 +193,7 @@ class key_gen:
         d = extended_gcd(phi, e)[2]
 
         d = d % phi
-        keys.set_private(n, prime_p, prime_q, d)
+        keys.set_private(n=n, p=prime_p, q=prime_q, d=d)
 
         return keys
 
@@ -197,19 +203,20 @@ class AES_key_gen:
 
     def __init__(self, bit_size = 128):
 
+        self.bit_size = bit_size
         sizes = [128, 192, 256]
 
         change = True
         for s in sizes:
-            if s == bit_size:
+            if s == self.bit_size:
                 change = False
 
         if change:
-            bit_size = 128
+            self.bit_size = 128
         
-        self.lower_bound = (1 << bit_size - 1)
-        self.upper_bound = (1 << (bit_size))
-
+        self.lower_bound = (1 << self.bit_size - 1)
+        self.upper_bound = (1 << (self.bit_size))
+    
     def generate_key(self):
         
         rg = SystemRandom()

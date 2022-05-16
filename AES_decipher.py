@@ -2,6 +2,8 @@ from utility import get_columns_form, get_vector_form, get_rows_form, get_xor, g
 from AES_encipher import AES_cipher
 
 class AES_decipher:
+    """ Class that does the decipher of using the AES algorithm 
+    (I just found out that I didn't need to do this class after I already did it lol)"""
 
     def __init__(self, key: bytes = None):
         self.encoding = 'utf-8'
@@ -221,4 +223,4 @@ class AES_decipher:
         state = self.__add_round_key__(state, round_keys[-1])
 
         return state
-        
+    

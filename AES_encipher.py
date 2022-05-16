@@ -5,6 +5,7 @@ def mask(i):
     return i & 255
     
 class AES_cipher:
+    """ Class that does the cipher of using the AES algorithm """
 
     def __init__(self, key: bytes = None):
         self.encoding = 'utf-8'
@@ -230,11 +231,13 @@ class AES_cipher:
         return state
 
 class CTR_Mode:
+    """ Uses the AES in counter mode. Does the encrytion/decryption. """
 
-    def __init__(self, key = None):
-        self.nonce = self.generate_nonce()
+    def __init__(self, key = None, nonce = None):
+        self.nonce = self.generate_nonce() if nonce == None else nonce
         self.cipher = AES_cipher(key)
         self.__counter__ = 0
+        self.__counter_decrypt__ = 0
         
     def generate_nonce(self):
         lower_bound = 0
@@ -245,16 +248,25 @@ class CTR_Mode:
 
         return nonce_value
 
-    def encrypt_block(self, data: bytes):
+    def encrypt_block(self, data: bytes, encrypt = True):
 
         if len(data) > 16:
             raise Exception("Data too large! I need 16 bytes")
-    
-        ctr_value = (self.nonce << 64) | self.__counter__
 
-        self.__counter__ += 1
+        # Needs to know if it is encryption or decryption
+        if encrypt == True:
+            ctr_value = (self.nonce << 64) | self.__counter__
+            self.__counter__ += 1
+
+        else:
+            ctr_value = (self.nonce << 64) | self.__counter_decrypt__
+            self.__counter_decrypt__ += 1
 
         ctr = ctr_value.to_bytes(length = 16, byteorder = "big")
         state = self.cipher.encrypt(ctr)
 
         return get_xor(data, state)
+
+    def decrypt_block(self, data: bytes):
+
+        return self.encrypt_block(data, encrypt=False)

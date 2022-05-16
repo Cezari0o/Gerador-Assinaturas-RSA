@@ -1,4 +1,5 @@
 from math import ceil, log2
+from hashlib import sha3_512 as SHA_hash
 
 def mask(i):
     return i & 255
@@ -24,12 +25,6 @@ def get_rows_form(vector, row_size):
     return matrix
 
 def get_columns_form(vector, row_size):
-
-    # if len(vector) % column_size != 0:
-    #     mat_size = len(vector) // column_size + 1
-
-    # else:
-    #     mat_size = len(vector) // column_size
     
     mat_size = row_size
     matrix = []
@@ -55,11 +50,27 @@ def get_vector_form(matrix, form = "row"):
     
     return vector
 
-def get_xor(w1: bytes, w2: bytes):
+def get_xor(w1: bytes, w2: bytes, order = 'big'):
     result = []
 
-    for idx, b in enumerate(w1):
-        result.append(b ^ w2[idx])
+    if len(w1) > len(w2):
+        temp = w1
+        w1 = w2
+        w2 = temp 
+
+    # if len(w1) != len(w2):
+    #     raise Exception("Error! Words differs in size!")
+    
+    if order == 'big':
+        for idx, b in enumerate(w1):
+            result.append(b ^ w2[idx])
+
+    else:
+        for idx in range(len(w1) - 1, -1, -1): 
+            result.append(w1[idx] ^ w2[idx])
+    
+        result = reversed(result)
+    
 
     return bytes(result)
 
@@ -90,9 +101,23 @@ def gmul(b: int, c: int):
     ans = 0
     for p in range(0, bit_size(c)):
 
-        # print(p)
         if (1 << p) & c != 0:
-            # print("entrei", 1 << p)
             ans ^= gmul_2(b, (1 << p))
 
     return ans
+
+def to_bytes(msg : str):
+    """ Returns the msg to bytes form."""
+    
+    return bytes(msg, encoding='utf-8')
+
+def from_bytes(msg: bytes):
+    """ Returns the msg to a string format"""
+
+    return msg.decode(encoding='utf-8')
+
+def hash_data(data: bytes):
+    hasher = SHA_hash()
+
+    hasher.update(data)
+    return hasher.digest()
